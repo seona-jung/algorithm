@@ -14,8 +14,8 @@ function solution(n, arr1, arr2) {
     return binary.reverse();
   }
 
-  arr1 = arr1.map((el) => convertToBinary(el));
-  arr2 = arr2.map((el) => convertToBinary(el));
+  arr1 = arr1.map(convertToBinary);
+  arr2 = arr2.map(convertToBinary);
 
   const result = Array(n)
     .fill()
