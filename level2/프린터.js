@@ -1,65 +1,44 @@
-// 선아
-
-// 더 수정할 예정
-// 왜 인덱스 0번째는 계속 검사 안 하는지 로직 확인하고 설명 쓰기
-
+// 내 풀이
 function solution(priorities, location) {
-  // 1. 우선순위가 담겨 있는 배열을 정렬한 배열(sorted)을 하나 새로 만든다.
-  // 2. 지금 검사하고 있는 문서의 index를 가리킬 pointer 변수를 하나 만든다.
-  // 3. 즉, 순환 큐(Circular Queue)를 구현한다.
-  // 순환 큐는 원소들을 옮기지 않고 반대로 전단과 후단의 위치를 유연하게 옮기는 방식이다.
-  // 4. 순환 큐를 돌면서 front(뽑아 낼 부분)를 검사하고 sorted[0]과 같으면 출력하고, rear(붙일 부분)쪽에 다시 넣는다.
+  const size = priorities.length;
+  let curIdx = 0; // front는 항상 빠져나갈 원소가 담겨있는 자리
+  // let rear = size; // rear는 항상 다음에 새로운 원소가 들어올 자리
+  // 지금 rear가 size인 이유는 따로 queue를 선언해서 넣어주는 작업 없이
+  // 이미 생성이 완료된 queue인 priorities 자체를 사용하기 떄문에
+  // => 여기선 원소가 더 들어올 일이 없는 꽉 찬 상태(Full)인 Queue임.
 
-  // 4.의 구현(front, rear의 변경)이 순환 큐의 관건이다.
+  // 새로 원소가 들어올 일은 없으니 enqueue()와 isFull()에 관한 건 구현하지 않는다.
+  // 따라서 원래라면 순환 큐의 isEmpty()와 isFull() 둘 다 잘 수행하기 위해 더미 공간 1개가 필요하지만
+  // 여기서는 만들지 않는다.
 
-  // 내림차순 배열
-  const sorted = priorities.slice().sort((a, b) => b - a);
-  priorities = priorities.map((p, i) => [p, i]);
+  // 사실 isEmpty도 필요 없고 rear도 필요 없다.
+  // 순환 큐가 아니기에... front도 아니고 사실 curIdx가 적합하다.
+  // 순환을 위한 모듈러 연산만 차용해왔을 뿐.
+  // - 추후 반영해서 수정했음 -
 
-  // push 혹은 shift를 하지 않는다. front, rear를 제어할 뿐이다.
-  // 순환 큐는 한 자리(맨 처음 자리)를 쓰지 않는다. isFull의 검사를 위해
-
-  const size = sorted.length + 1;
-  let front = size;
-  let rear = size;
-
-  const isEmpty = () => front === rear;
-
-  const isFull = () => (rear + 1) % size === front;
-  // rear를 하나 증가시키고 데이터를 넣으려 보니까 그 자리에는 front라는 것이 자리 잡고 있는 것이다.
-  // 여기서 중요한 사실은 큐에서 1개는 사실 쓸 수 없다는 것이다.
-  // rear + 1 자리에 front가 있는지 알아보기 위해서이다.
-
-  const enqueue = (data) => {
-    // 우선 큐가 꽉 차있는지 본다. 여기서는 사실 필요 없다.
-    if (isFull()) return;
-    rear = (rear + 1) % size;
-    queue[rear] = data;
-  };
-
+  // const isEmpty = () => front === rear;
   const dequeue = () => {
-    if (isEmpty()) return;
-    front = (front + 1) % size;
-    return queue[front];
+    // if (isEmpty()) return;
+    let tmp = curIdx;
+    curIdx = (curIdx + 1) % size;
+    return priorities[tmp];
   };
 
-  const queue = [0];
-  for (const p of priorities) {
-    enqueue(p);
-  }
+  const isPrinted = Array(size).fill(false);
+  const sorted = priorities.slice().sort((a, b) => b - a);
+  let count = 0;
+  let max = sorted[count];
 
-  let count = 1;
-
-  while (!isEmpty()) {
-    const current = dequeue();
-    if (sorted[0] === current[0]) {
-      if (current[1] === location) {
-        return count;
-      }
-      sorted.shift();
-      count++;
-    } else {
-      enqueue(current);
+  while (true) {
+    if (isPrinted[curIdx]) {
+      curIdx = (curIdx + 1) % size;
+      continue;
     }
+    if (priorities[curIdx] === max) {
+      max = sorted[++count];
+      if (curIdx === location) return count;
+      isPrinted[curIdx] = true;
+    }
+    dequeue();
   }
 }
