@@ -1,33 +1,72 @@
 function solution(name) {
-  let count = 0;
-  const arr = Array(name.length).fill('A');
+  const charCodeOfA = 'A'.charCodeAt(0);
 
-  const alphabet = {};
-  // 대문자 알파벳 26개
-  for (let i = 65; i < 65 + 26; i++) {
-    alphabet[String.fromCharCode(i)] = i;
-  }
+  const gaps = name.split('').map((n) => {
+    let step = n.charCodeAt(0) - charCodeOfA;
+    if (step > 13) step = 26 - step;
+    return step;
+  });
 
-  //TODO: 아직 미완! 이것들을 해야 함!
-  // 무시해야 하는 A 문자가 있는 경우
-  // 다음에 처리할 자리가 맨 오른쪽으로 이동되어야 하는 경우
-  // 다음에 처리할 자리가 이전 자리보다 왼쪽인 경우
+  // 0이 없다면? 그냥 gaps 원소의 합 + gaps.length - 1이 답임!
+  if (gaps.indexOf(0) === -1)
+    return gaps.reduce((acc, cur) => acc + cur) + gaps.length - 1;
 
-  for (let i = 0; i < arr.length; i++) {
-    // A인 곳으로는 가지도 않는다.
-    // 그건 그냥 continue로 넘긴다.
-    if (name[i] === 'A') {
-      continue;
+  // 0이 있을 때가 문제!! (무시해야 하는 'A'가 있을 때)
+
+  // 왼쪽 이동 -> 0일 때만 맨 마지막 원소로 이동
+  // 오른쪽 이동 -> length - 1일때만 맨 처음 원소로 이동
+
+  // 방문한 애는 0으로 만들어 버린다!
+
+  let result = 0;
+  let i = 0;
+  while (true) {
+    result += gaps[i];
+    gaps[i] = 0; // 0으로 바꿔주기
+
+    // 이동 방향 결정!
+    // 0이 아닌 것이 나오는 순간이 더 가까운쪽으로 간다!
+    // 오른쪽까지의 거리, 왼쪽까지의 거리
+    // 양쪽 거리가 같다면 오른쪽으로 가라!
+
+    // 오른쪽 이동
+    let rightCount = 0;
+    let j = i;
+    while (rightCount < gaps.length) {
+      rightCount++;
+      if (j === gaps.length - 1) j = 0;
+      else j++;
+      if (gaps[j] !== 0) break;
     }
-    // name[i]랑 같아질 때까지 이동
-    // 반대로 이동한 게 더 가까우면 그걸로 채택..
-    let minStep = Math.abs(alphabet[name[i]] - alphabet[arr[i]]);
-    if (minStep > 13) minStep = 26 - minStep;
-    count += minStep;
-    // 커서 이동
-    count++;
-  }
 
-  // 마지막에 커서 이동한 거 제외
-  return count - 1;
+    // 왼쪽 이동
+    let leftCount = 0;
+    j = i;
+    while (leftCount < gaps.length) {
+      leftCount++;
+      if (j === 0) j = gaps.length - 1;
+      else j--;
+      if (gaps[j] !== 0) break;
+    }
+
+    if (leftCount === gaps.length && rightCount === gaps.length) return result;
+
+    const minStep = Math.min(rightCount, leftCount);
+    if (minStep === rightCount) {
+      // 오른쪽으로 가자
+      for (let j = 0; j < minStep; j++) {
+        // 근데 i가 gaps.length -1일 때는
+        if (i === gaps.length - 1) i = 0;
+        else i++;
+      }
+    } else {
+      // 왼쪽으로 가자
+      for (let j = 0; j < minStep; j++) {
+        // 근데 i가 0일 때는
+        if (i === 0) i = gaps.length - 1;
+        else i--;
+      }
+    }
+    result += minStep;
+  }
 }
