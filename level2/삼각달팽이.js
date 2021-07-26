@@ -25,8 +25,7 @@ function solution(n) {
     const [dRow, dCol] = MOVES[curDir];
     const [newRow, newCol] = [row + dRow, col + dCol];
     if (
-      triangle[newRow] === undefined ||
-      triangle[newRow][newCol] === undefined ||
+      triangle[newRow]?.[newCol] === undefined ||
       triangle[newRow][newCol] !== 0
     ) {
       curDir = (curDir + 1) % 3;
