@@ -41,7 +41,7 @@ function solution(jobs) {
     return popped;
   }
 
-  // * jobs는 시작 시간순으로 정렬이 되어있지만 소요 시간순으로는 정렬이 안 되어 있으므로 정렬 수행
+  // * jobs는 시작 시간순, 소요 시간순으로 오름차순 정렬 수행
   jobs.sort((a, b) => {
     if (a[0] > b[0]) return 1;
     if (a[0] < b[0]) return -1;
@@ -49,6 +49,7 @@ function solution(jobs) {
     if (a[1] > b[1]) return 1;
     else return -1;
   });
+
   // 0. 작업들의 요청부터 종료까지 걸린 시간의 합을 sum이란 변수에 저장, 현재 시간을 currentTime 변수에 저장
   // 1. sum에 jobs[0]의 작업 요청부터 종료까지 걸린 시간 추가, currentTime을 시작 시간 + 걸린 시간으로 update
   // 2. jobs(인덱스 1부터)를 돌면서 시작 시간이 currentTime보다 작거나 같은 애들을 heap에 insert한다.
@@ -79,8 +80,7 @@ function solution(jobs) {
 
     // job들을 돌면서 시작 시간이 currentTime보다 작거나 같은 job들을 heap에 넣는다.
     while (currentIdx < jobs.length && jobs[currentIdx][0] <= currentTime) {
-      insert(jobs[currentIdx]);
-      currentIdx++;
+      insert(jobs[currentIdx++]);
     }
 
     // while문이 끝났으면 (job들을 다 돌았거나 다음 job의 시작 시간이 currentTime보다 크다면)
@@ -92,11 +92,11 @@ function solution(jobs) {
     }
     // heap에 원소가 없다면
     else {
-      // 수행해야 할 job이 아직 남았다면 heap에 넣고 currentTime도 heap에 넣은 원소의 시작 시간으로 update하고  continue;
+      // 수행해야 할 job이 아직 남았다면 heap에 넣고,
+      // currentTime도 heap에 넣은 원소의 시작 시간으로 update하고 continue;
       if (currentIdx < jobs.length) {
-        insert(jobs[currentIdx]);
         currentTime = jobs[currentIdx][0];
-        currentIdx++;
+        insert(jobs[currentIdx++]);
         continue;
       }
       // 수행해야 할 job이 안 남았다면 바로 return;
