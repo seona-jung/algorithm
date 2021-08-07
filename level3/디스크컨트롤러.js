@@ -42,6 +42,10 @@ function solution(jobs) {
   }
 
   // * jobs는 시작 시간순, 소요 시간순으로 오름차순 정렬 수행
+  // ! 여기가 참 문제다.
+  // insert에서 소요 시간순으로 정렬하면서 넣으면서 왜 맨 처음 job에서도 소요 시간 순으로도 정렬해주냐?
+  // 그것은 heap이 비어 있어서 job을 하나 그냥 넣을 때 때문이다.
+  // (맨 처음 job 수행할 때와 중간에 heap이 비었는데 수행해야 할 job은 남아서 다음 job 하나 넣어줄 때)
   jobs.sort((a, b) => {
     if (a[0] > b[0]) return 1;
     if (a[0] < b[0]) return -1;
@@ -58,7 +62,7 @@ function solution(jobs) {
   // 4-2. 2-3의 과정을 하면서 job이 비었는데 heap에 원소가 남아있다면 removeRoot를 하고 sum, currentTime만 쭉 업데이트하고 return sum;
   // 5. heap도 비었고, jobs도 다 수행했다면 return
 
-  let heap = [];
+  const heap = [];
 
   let root = jobs[0];
   let currentTime = root[0] + root[1];
@@ -105,4 +109,33 @@ function solution(jobs) {
       }
     }
   }
+}
+
+// 다른 사람 코드
+function solution(jobs) {
+  var answer = 0;
+  jobs.sort((a, b) => a[0] - b[0]); // 첫 작업은 가장 먼저오는 걸로
+  const pq = []; // 우선 순위 큐 (시작이 가능한 일들이 들어가며 작업 시간 오름차순 정렬됨)
+  let i = 0,
+    time = 0;
+  while (i < jobs.length || pq.length != 0) {
+    // 우선 순위 큐가 비어야 종료됨
+
+    // 우선 순위 큐 넣는 작업
+    if (i < jobs.length && jobs[i][0] <= time) {
+      pq.push(jobs[i++]);
+      pq.sort((a, b) => a[1] - b[1]);
+      continue; //다음 것도 넣어 보러 간다~~
+    }
+    // 현재 도착한 작업이 없을 때
+    if (pq.length === 0) {
+      time = jobs[i][0]; // 첫 작업을 현재 시간으로 바꿔준다.
+    } else {
+      const [start, work] = pq.shift();
+      answer += time + work - start;
+      time += work;
+    }
+  }
+
+  return parseInt(answer / jobs.length);
 }
